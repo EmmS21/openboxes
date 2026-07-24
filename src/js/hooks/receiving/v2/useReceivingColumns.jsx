@@ -30,6 +30,9 @@ import VerticalStripeIndicator from 'utils/VerticalStripeIndicator';
 const useReceivingColumns = ({
   view,
   putawayEnabled,
+  sortableProps,
+  sort,
+  order,
 } = {}) => {
   const translate = useTranslate();
   const formatNumber = useFormatNumber();
@@ -38,6 +41,12 @@ const useReceivingColumns = ({
   const isShipmentFromPurchaseOrder = useSelector(getIsShipmentFromPurchaseOrder);
   const binLocations = useSelector(getReceivingBinLocations);
   const isPackingListView = view === ReceivingView.PACKING_LIST;
+
+  const sortHeaderProps = (columnId) => (isPackingListView ? {} : {
+    sortable: true,
+    columnId,
+    ...sortableProps,
+  });
 
   // Rows are { id, meta } objects; the entities live in the normalized state
   // passed through the table `meta`, so each cell reads its item by id at render
@@ -175,6 +184,7 @@ const useReceivingColumns = ({
         id: receivingColumns.PRODUCT_CODE,
         header: () => (
           <TableHeaderCell
+            {...sortHeaderProps(receivingColumns.PRODUCT_CODE)}
             tooltip
             tooltipLabel={translate('react.receiving.code.label', 'Code')}
           >
@@ -207,6 +217,7 @@ const useReceivingColumns = ({
         id: receivingColumns.PRODUCT,
         header: () => (
           <TableHeaderCell
+            {...sortHeaderProps(receivingColumns.PRODUCT)}
             tooltip
             tooltipLabel={translate('react.receiving.product.label', 'Product')}
           >
@@ -242,6 +253,7 @@ const useReceivingColumns = ({
         id: receivingColumns.LOT_NUMBER,
         header: () => (
           <TableHeaderCell
+            {...sortHeaderProps(receivingColumns.LOT_NUMBER)}
             tooltip
             tooltipLabel={translate('react.receiving.lotSerialNo.label', 'Lot/Serial No.')}
           >
@@ -268,6 +280,7 @@ const useReceivingColumns = ({
         id: receivingColumns.EXPIRATION_DATE,
         header: () => (
           <TableHeaderCell
+            {...sortHeaderProps(receivingColumns.EXPIRATION_DATE)}
             tooltip
             tooltipLabel={translate('react.receiving.expirationDate.label', 'Expiration date')}
           >
@@ -293,6 +306,7 @@ const useReceivingColumns = ({
         id: receivingColumns.RECIPIENT,
         header: () => (
           <TableHeaderCell
+            {...sortHeaderProps(receivingColumns.RECIPIENT)}
             tooltip
             tooltipLabel={translate('react.receiving.recipient.label', 'Recipient')}
           >
@@ -322,6 +336,7 @@ const useReceivingColumns = ({
           id: receivingColumns.QUANTITY_SHIPPED_IN_PO,
           header: () => (
             <TableHeaderCell
+              {...sortHeaderProps(receivingColumns.QUANTITY_SHIPPED_IN_PO)}
               tooltip
               tooltipLabel={translate('react.receiving.shippedInPo.label', 'Shipped (in PO UoM)')}
             >
@@ -357,7 +372,11 @@ const useReceivingColumns = ({
             : 'react.receiving.shipped.label';
           const defaultLabel = isShipmentFromPurchaseOrder ? 'Shipped (each)' : 'Shipped';
           return (
-            <TableHeaderCell tooltip tooltipLabel={translate(labelKey, defaultLabel)}>
+            <TableHeaderCell
+              {...sortHeaderProps(receivingColumns.QUANTITY_SHIPPED)}
+              tooltip
+              tooltipLabel={translate(labelKey, defaultLabel)}
+            >
               {translate(labelKey, defaultLabel)}
             </TableHeaderCell>
           );
@@ -529,6 +548,8 @@ const useReceivingColumns = ({
     putawayEnabled,
     isShipmentFromPurchaseOrder,
     binLocations,
+    sort,
+    order,
   ]);
 
   return { columns };
