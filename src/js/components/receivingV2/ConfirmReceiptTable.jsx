@@ -4,22 +4,16 @@ import PropTypes from 'prop-types';
 
 import DataTable from 'components/DataTable/v2/DataTable';
 import CommentModal from 'components/modals/CommentModal';
-import EditLineItemModal from 'components/receivingV2/editModal/EditLineItemModal';
-import useEditReceivingLineItemModal from 'hooks/receiving/v2/useEditReceivingLineItemModal';
 import buildReceivingTableRows from 'utils/receiving/buildReceivingTableRows';
 
 import 'components/receivingV2/receiving.scss';
 
-const ReceivingTable = ({
+const ConfirmReceiptTable = ({
   lineItemsState,
   columns,
   loading,
-  receiptId,
-  updateLineItem,
   commentModal,
-  removeSplitItem,
-  loadReceipt,
-  onLocationAutofill,
+  cancelRemaining,
 }) => {
   const {
     isOpen: isCommentModalOpen,
@@ -27,33 +21,21 @@ const ReceivingTable = ({
     closeModal: closeCommentModal,
   } = commentModal;
 
-  const {
-    isOpen: isEditModalOpen,
-    itemId: editedItemId,
-    openModal: openEditModal,
-    closeModal: closeEditModal,
-    getInitialEditModalLineItems,
-  } = useEditReceivingLineItemModal(lineItemsState);
-
-  // Keep `meta` stable so it only changes when the entities map or
-  // the update function change. Combined with the memoized cells, a single line item update
-  // re-renders just that row instead of the whole table.
+  // Keep `meta` stable so it only changes when the entities map or the cancel remaining
+  // selection change. Combined with the memoized cells, a single row update re-renders
+  // just that row instead of the whole table.
   const meta = useMemo(
     () => ({
       entities: lineItemsState.entities,
-      updateLineItem,
-      removeSplitItem,
       onOpenCommentModal: openCommentModal,
-      onOpenEditModal: openEditModal,
-      onLocationAutofill,
+      cancelRemainingIds: cancelRemaining.ids,
+      onToggleCancelRemaining: cancelRemaining.toggle,
     }),
     [
       lineItemsState.entities,
-      updateLineItem,
       openCommentModal,
-      openEditModal,
-      removeSplitItem,
-      onLocationAutofill,
+      cancelRemaining.ids,
+      cancelRemaining.toggle,
     ],
   );
 
@@ -82,28 +64,17 @@ const ReceivingTable = ({
           minSize: 20,
           estimateSize: 72,
           overscan: 10,
-          // Rows vary in height (2-line product cell, separator rows), so let
-          // the virtualizer measure each row instead of using a fixed height.
           customRowsHeight: true,
         }}
         getSubRows={(row) => row.subRows}
         defaultExpandedSubRows
       />
       <CommentModal isOpen={isCommentModalOpen} onClose={closeCommentModal} />
-      {isEditModalOpen && (
-        <EditLineItemModal
-          onClose={closeEditModal}
-          lineItem={lineItemsState.entities[editedItemId]}
-          initialLineItems={getInitialEditModalLineItems(editedItemId)}
-          receiptId={receiptId}
-          loadReceipt={loadReceipt}
-        />
-      )}
     </div>
   );
 };
 
-ReceivingTable.propTypes = {
+ConfirmReceiptTable.propTypes = {
   lineItemsState: PropTypes.shape({
     entities: PropTypes.shape({}),
     ids: PropTypes.arrayOf(PropTypes.oneOfType([
@@ -115,20 +86,15 @@ ReceivingTable.propTypes = {
   }).isRequired,
   columns: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   loading: PropTypes.bool.isRequired,
-  receiptId: PropTypes.string,
-  updateLineItem: PropTypes.func.isRequired,
-  removeSplitItem: PropTypes.func.isRequired,
-  loadReceipt: PropTypes.func.isRequired,
   commentModal: PropTypes.shape({
     isOpen: PropTypes.bool.isRequired,
     openModal: PropTypes.func.isRequired,
     closeModal: PropTypes.func.isRequired,
   }).isRequired,
-  onLocationAutofill: PropTypes.func.isRequired,
+  cancelRemaining: PropTypes.shape({
+    ids: PropTypes.instanceOf(Set).isRequired,
+    toggle: PropTypes.func.isRequired,
+  }).isRequired,
 };
 
-ReceivingTable.defaultProps = {
-  receiptId: null,
-};
-
-export default ReceivingTable;
+export default ConfirmReceiptTable;

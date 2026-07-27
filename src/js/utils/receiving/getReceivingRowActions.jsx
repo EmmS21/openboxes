@@ -2,6 +2,14 @@ import React from 'react';
 
 import { RiChat1Line, RiDeleteBinLine, RiPencilLine } from 'react-icons/ri';
 
+const buildCommentAction = ({ itemId, onOpenCommentModal }) => ({
+  key: 'comment',
+  icon: <RiChat1Line size={22} />,
+  onClick: () => onOpenCommentModal?.(itemId),
+  label: 'react.receiving.comment.label',
+  defaultLabel: 'Comment',
+});
+
 /**
  * Builds the action descriptors for a receiving row, consumed by ActionsCell.
  */
@@ -13,13 +21,14 @@ const getReceivingRowActions = ({ itemId, onOpenCommentModal, onOpenEditModal })
     label: 'react.default.button.edit.label',
     defaultLabel: 'Edit',
   },
-  {
-    key: 'comment',
-    icon: <RiChat1Line size={22} />,
-    onClick: () => onOpenCommentModal?.(itemId),
-    label: 'react.receiving.comment.label',
-    defaultLabel: 'Comment',
-  },
+  buildCommentAction({ itemId, onOpenCommentModal }),
+];
+
+/**
+ * Builds the action descriptors for a check step row, consumed by ActionsCell.
+ */
+export const getConfirmReceiptRowActions = ({ itemId, onOpenCommentModal }) => [
+  buildCommentAction({ itemId, onOpenCommentModal }),
 ];
 
 /**
