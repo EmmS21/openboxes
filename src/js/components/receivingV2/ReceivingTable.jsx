@@ -20,6 +20,8 @@ const ReceivingTable = ({
   removeSplitItem,
   loadReceipt,
   onLocationAutofill,
+  sort,
+  order,
 }) => {
   const {
     isOpen: isCommentModalOpen,
@@ -104,6 +106,9 @@ const ReceivingTable = ({
   return (
     <div className="receiving-table">
       <DataTable
+        // Force TanStack table remount whenever the sort changes so the initialState
+        // (`expanded: true`) re-applies and every changes group is expanded again.
+        key={`${sort ?? ''}-${order ?? ''}`}
         columns={columns}
         data={data}
         totalCount={data.length}
@@ -167,10 +172,14 @@ ReceivingTable.propTypes = {
     closeModal: PropTypes.func.isRequired,
   }).isRequired,
   onLocationAutofill: PropTypes.func.isRequired,
+  sort: PropTypes.string,
+  order: PropTypes.string,
 };
 
 ReceivingTable.defaultProps = {
   receiptId: null,
+  sort: null,
+  order: null,
 };
 
 export default ReceivingTable;

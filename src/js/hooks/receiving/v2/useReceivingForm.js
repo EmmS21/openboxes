@@ -1,10 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import {
+  useCallback, useEffect, useRef, useState,
+} from 'react';
 
 import { ReceivingView } from 'consts/receivingViewOptions';
 import useCommentModal from 'hooks/receiving/v2/useCommentModal';
 import useReceivingActions from 'hooks/receiving/v2/useReceivingActions';
 import useReceivingBinLocations from 'hooks/receiving/v2/useReceivingBinLocations';
 import useReceivingColumns from 'hooks/receiving/v2/useReceivingColumns';
+import useReceivingFilters from 'hooks/receiving/v2/useReceivingFilters';
 import useTableLocationAutofill from 'hooks/receiving/v2/useTableLocationAutofill';
 import useTableSorting from 'hooks/useTableSorting';
 
@@ -26,13 +29,17 @@ const useReceivingForm = () => {
     onSaveAndExit,
     flush,
     autosaveStatus,
-    updateFilterParams,
   } = useReceivingActions({ view, sort, sortOrder: order });
   useReceivingBinLocations();
+  const { visibleLineItemsState, updateFilterParams } = useReceivingFilters({ lineItemsState });
   const { onLocationAutofill } = useTableLocationAutofill({
-    lineItemsState,
+    lineItemsState: visibleLineItemsState,
     updateLineItems,
   });
+  const autofillVisibleQuantities = useCallback(
+    () => autofillQuantities(visibleLineItemsState),
+    [autofillQuantities, visibleLineItemsState],
+  );
   const commentModal = useCommentModal();
   // Auto-enable once when a reopened receipt has at least one row with a saved bin location,
   // so the column is visible.
@@ -60,14 +67,16 @@ const useReceivingForm = () => {
     putawayEnabled,
     setPutawayEnabled,
     table: {
-      lineItemsState,
+      lineItemsState: visibleLineItemsState,
       columns,
+      sort,
+      order,
     },
     actions: {
       loading,
       receiptId,
       updateLineItem,
-      autofillQuantities,
+      autofillQuantities: autofillVisibleQuantities,
       removeSplitItem,
       loadReceipt,
       onSaveAndExit,
